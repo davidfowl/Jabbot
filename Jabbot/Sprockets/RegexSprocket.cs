@@ -1,11 +1,9 @@
-﻿using System;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using Jabbot.Models;
-using Jabbot.Sprokets;
 
 namespace Jabbot.Sprockets
 {
-    public abstract class RegexSproket : ISproket
+    public abstract class RegexSprocket : ISprocket
     {
         public abstract Regex Pattern { get; }
 

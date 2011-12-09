@@ -6,7 +6,7 @@ using System.IO;
 using System.Net;
 using System.Web.Hosting;
 using Jabbot.Models;
-using Jabbot.Sprokets;
+using Jabbot.Sprockets;
 using SignalR.Client.Hubs;
 
 namespace Jabbot
@@ -16,10 +16,10 @@ namespace Jabbot
         private readonly HubConnection _connection;
         private readonly IHubProxy _chat;
         private readonly string _password;
-        private readonly List<ISproket> _sprokets = new List<ISproket>();
+        private readonly List<ISprocket> _sprockets = new List<ISprocket>();
         private readonly HashSet<string> _rooms = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-        private const string ExtensionsFolder = "Sprokets";
+        private const string ExtensionsFolder = "Sprockets";
 
         public Bot(string url, string name, string password)
         {
@@ -58,27 +58,27 @@ namespace Jabbot
         public event Action<ChatMessage> MessageReceived;
 
         /// <summary>
-        /// Add a sproket to the bot instance
+        /// Add a sprocket to the bot instance
         /// </summary>
-        public void AddSproket(ISproket sproket)
+        public void AddSprocket(ISprocket sprocket)
         {
-            _sprokets.Add(sproket);
+            _sprockets.Add(sprocket);
         }
 
         /// <summary>
-        /// Remove a sproket from the bot instance
+        /// Remove a sprocket from the bot instance
         /// </summary>
-        public void RemoveSproket(ISproket sproket)
+        public void RemoveSprocket(ISprocket sprocket)
         {
-            _sprokets.Remove(sproket);
+            _sprockets.Remove(sprocket);
         }
 
         /// <summary>
-        /// Remove all sprokets
+        /// Remove all sprockets
         /// </summary>
-        public void ClearSprokets()
+        public void ClearSprockets()
         {
-            _sprokets.Clear();
+            _sprockets.Clear();
         }
 
         /// <summary>
@@ -251,8 +251,8 @@ namespace Jabbot
                 MessageReceived(chatMessage);
             }
 
-            // Loop over the registered sprokets
-            foreach (var handler in _sprokets)
+            // Loop over the registered sprockets
+            foreach (var handler in _sprockets)
             {
                 // Stop at the first one that handled the message
                 if (handler.Handle(chatMessage, this))
@@ -299,10 +299,10 @@ namespace Jabbot
 
             var container = new CompositionContainer(catalog);
 
-            // Add all the sprokets to the sproket list
-            foreach (var sproket in container.GetExportedValues<ISproket>())
+            // Add all the sprockets to the sprocket list
+            foreach (var sprocket in container.GetExportedValues<ISprocket>())
             {
-                AddSproket(sproket);
+                AddSprocket(sprocket);
             }
         }
 
