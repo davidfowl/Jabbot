@@ -10,4 +10,6 @@ deploy/*
 *.cache
 packages/
 msbuild.log
+artifacts/log
 artifacts/
+post-build*
