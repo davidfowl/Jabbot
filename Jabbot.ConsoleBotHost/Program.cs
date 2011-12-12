@@ -10,17 +10,34 @@ namespace Jabbot.ConsoleBotHost
         private static readonly string _botName = ConfigurationManager.AppSettings["Bot.Name"];
         private static readonly string _botPassword = ConfigurationManager.AppSettings["Bot.Password"];
         private static readonly string _botRooms = ConfigurationManager.AppSettings["Bot.RoomList"];
-
+        private static bool _appShouldExit = false;
         static void Main(string[] args)
         {
             Console.WriteLine("Jabbot Bot Runner Starting...");
-            Console.WriteLine(String.Format("Connecting to {0}...", _serverUrl));
-            Bot bot = new Bot(_serverUrl, _botName, _botPassword);
-            bot.PowerUp();
-            JoinRooms(bot);
-            Console.Write("Press enter to quit...");
-            Console.ReadLine();
-            bot.ShutDown();
+            while (!_appShouldExit)
+            {
+                RunBot();
+            }
+
+        }
+
+        private static void RunBot()
+        {
+            try
+            {
+                Console.WriteLine(String.Format("Connecting to {0}...", _serverUrl));
+                Bot bot = new Bot(_serverUrl, _botName, _botPassword);
+                bot.PowerUp();
+                JoinRooms(bot);
+                Console.Write("Press enter to quit...");
+                Console.ReadLine();
+                bot.ShutDown();
+                _appShouldExit = true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("ERROR: " + e.GetBaseException().Message);
+            }
 
         }
         private static void JoinRooms(Bot bot)
