@@ -5,6 +5,7 @@ using System.ComponentModel.Composition.Primitives;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Hosting;
 using Jabbot.Models;
@@ -22,6 +23,10 @@ namespace Jabbot
         private readonly HashSet<string> _rooms = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         private const string ExtensionsFolder = "Sprockets";
+
+        private ComposablePartCatalog _catalog = null;
+        private CompositionContainer _container = null;
+
 
         public Bot(string url, string name, string password)
         {
@@ -110,6 +115,8 @@ namespace Jabbot
                 {
                     // Setup the name of the bot
                     Send(String.Format("/nick {0} {1}", Name, _password));
+
+                    IntializeSprockets();
                 }
             }
         }
@@ -265,7 +272,7 @@ namespace Jabbot
                     {
                         break;
                     }
-                }
+                 }
             })
             .ContinueWith(task =>
             {
@@ -297,28 +304,53 @@ namespace Jabbot
 
         private void InitializeContainer()
         {
-            string extensionsPath = GetExtensionsPath();
-            ComposablePartCatalog catalog = null;
-
-            // If the extensions folder exists then use them
-            if (Directory.Exists(extensionsPath))
-            {
-                catalog = new AggregateCatalog(
-                            new AssemblyCatalog(typeof(Bot).Assembly),
-                            new DirectoryCatalog(extensionsPath, "*.dll"));
-            }
-            else
-            {
-                catalog = new AssemblyCatalog(typeof(Bot).Assembly);
-            }
-
-            var container = new CompositionContainer(catalog);
-
+            var container = CreateCompositionContainer();
             // Add all the sprockets to the sprocket list
             foreach (var sprocket in container.GetExportedValues<ISprocket>())
             {
+                Trace.WriteLine(String.Format("Adding {0}...", sprocket.GetType().Name));
                 AddSprocket(sprocket);
             }
+        }
+
+        private void IntializeSprockets()
+        {
+            var container = CreateCompositionContainer();
+            // Run all sprocket initializers
+            foreach (var sprocketInitializer in container.GetExportedValues<ISprocketInitializer>())
+            {
+                try
+                {
+                    sprocketInitializer.Initialize(this);
+                }
+                catch (Exception ex)
+                {
+                    Trace.WriteLine(String.Format("Unable to Initialize {0}:{1}", sprocketInitializer.GetType().Name, ex.GetBaseException().Message));
+                }
+            }
+        }
+
+        private CompositionContainer CreateCompositionContainer()
+        {
+            if (_container == null)
+            {
+                string extensionsPath = GetExtensionsPath();
+
+                // If the extensions folder exists then use them
+                if (Directory.Exists(extensionsPath))
+                {
+                    _catalog = new AggregateCatalog(
+                                new AssemblyCatalog(typeof(Bot).Assembly),
+                                new DirectoryCatalog(extensionsPath, "*.dll"));
+                }
+                else
+                {
+                    _catalog = new AssemblyCatalog(typeof(Bot).Assembly);
+                }
+
+                _container = new CompositionContainer(_catalog);
+            }
+            return _container;
         }
 
         private static string GetExtensionsPath()
