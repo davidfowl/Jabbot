@@ -14,7 +14,7 @@ namespace Jabbot.Sprockets
             {
                 return false;
             }
-            
+
             Match match;
             if (!(match = Pattern.Match(message.Content)).Success)
             {
