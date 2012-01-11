@@ -35,7 +35,7 @@ namespace Jabbot.AspNetBotHost
                 }
                 catch (Exception e)
                 {
-                    return e.Message;
+                    return e.GetBaseException().ToString();
                 }
             };
 
@@ -77,7 +77,7 @@ namespace Jabbot.AspNetBotHost
         {
             if (!_hostBaseUrl.Contains("localhost"))
             {
-                ScheduleKeepAlive(_hostBaseUrl + "/keepalive");
+                //ScheduleKeepAlive(_hostBaseUrl + "/keepalive");
             }
             if (_bot != null)
             {

@@ -13,4 +13,4 @@ msbuild.log
 artifacts/log
 artifacts/
 post-build*
-Sprockets/*
+Jabbot.AspNetBotHost/Sprockets/*
