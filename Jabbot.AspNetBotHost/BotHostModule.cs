@@ -6,6 +6,7 @@ using System.Configuration;
 using Nancy;
 using System.Diagnostics;
 using MomentApp;
+using System.Threading.Tasks;
 
 namespace Jabbot.AspNetBotHost
 {
@@ -56,7 +57,7 @@ namespace Jabbot.AspNetBotHost
             // We create a task with MomentApp (TBD whether we will use this permanently
             Get["/keepalive"] = _ =>
             {
-                ScheduleKeepAlive(Request.Url.ToString());
+                ScheduleKeepAlive(_hostBaseUrl + "/keepalive");
                 return "OK";
             };
         }
@@ -65,8 +66,9 @@ namespace Jabbot.AspNetBotHost
 
         private static void ScheduleKeepAlive(string Url)
         {
+            return;
             new Moment(_momentApiKey).ScheduleJob(new Job()
-            {
+            {   
                 at = DateTime.Now.AddMinutes(5),
                 method = "GET",
                 uri = new Uri(Url)
@@ -77,7 +79,13 @@ namespace Jabbot.AspNetBotHost
         {
             if (!_hostBaseUrl.Contains("localhost"))
             {
-                //ScheduleKeepAlive(_hostBaseUrl + "/keepalive");
+                if (!Uri.IsWellFormedUriString(_hostBaseUrl, UriKind.Absolute))
+                    throw new InvalidOperationException("The Application.HostBaseUrl is not well formed.  Check the configuration settings.");
+                Task.Factory.StartNew(() =>
+                {
+                    ScheduleKeepAlive(_hostBaseUrl + "/keepalive");
+                });
+
             }
             if (_bot != null)
             {
@@ -85,6 +93,7 @@ namespace Jabbot.AspNetBotHost
             }
             _bot = new Bot(_serverUrl, _botName, _botPassword);
             _bot.PowerUp();
+            
             JoinRooms(_bot);
 
         }

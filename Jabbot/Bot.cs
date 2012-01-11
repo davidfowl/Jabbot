@@ -405,7 +405,7 @@ namespace Jabbot
         private static string GetExtensionsPath()
         {
             string rootPath = null;
-            if (HostingEnvironment.IsHosted)
+            if (HostingEnvironment.IsHosted)    
             {
 
                 rootPath = HostingEnvironment.ApplicationPhysicalPath;
