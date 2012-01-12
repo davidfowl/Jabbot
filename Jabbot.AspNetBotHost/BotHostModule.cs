@@ -12,17 +12,15 @@ namespace Jabbot.AspNetBotHost
 {
     public class BotHostModule : NancyModule
     {
-        private static readonly string _hostBaseUrl = ConfigurationManager.AppSettings["Application.HostBaseUrl"];
         private static readonly string _serverUrl = ConfigurationManager.AppSettings["Bot.Server"];
         private static readonly string _botName = ConfigurationManager.AppSettings["Bot.Name"];
         private static readonly string _botPassword = ConfigurationManager.AppSettings["Bot.Password"];
         private static readonly string _botRooms = ConfigurationManager.AppSettings["Bot.RoomList"];
-        private static readonly string _momentApiKey = ConfigurationManager.AppSettings["Moment.ApiKey"];
         private static Bot _bot;
-
         public BotHostModule()
         {
-            StartBot();
+            if (_bot == null)
+                StartBot();
             Get["/"] = _ =>
             {
                 return "Jabbot AspNet Nancy Bot Runner";
@@ -52,51 +50,35 @@ namespace Jabbot.AspNetBotHost
                     return e.Message;
                 }
             };
-
-            // This is for ensuring that the process doesn't die permanently -- 
-            // We create a task with MomentApp (TBD whether we will use this permanently
-            Get["/keepalive"] = _ =>
-            {
-                ScheduleKeepAlive(_hostBaseUrl + "/keepalive");
-                return "OK";
-            };
         }
 
 
-
-        private static void ScheduleKeepAlive(string Url)
-        {
-            return;
-            new Moment(_momentApiKey).ScheduleJob(new Job()
-            {   
-                at = DateTime.Now.AddMinutes(5),
-                method = "GET",
-                uri = new Uri(Url)
-            });
-        }
 
         private static void StartBot()
         {
-            if (!_hostBaseUrl.Contains("localhost"))
-            {
-                if (!Uri.IsWellFormedUriString(_hostBaseUrl, UriKind.Absolute))
-                    throw new InvalidOperationException("The Application.HostBaseUrl is not well formed.  Check the configuration settings.");
-                Task.Factory.StartNew(() =>
-                {
-                    ScheduleKeepAlive(_hostBaseUrl + "/keepalive");
-                });
 
-            }
+            KeepAliveModule.ScheduleKeepAlive();
             if (_bot != null)
             {
-                _bot.ShutDown();
+                TryShutBotDown();
             }
             _bot = new Bot(_serverUrl, _botName, _botPassword);
             _bot.PowerUp();
-            
+
             JoinRooms(_bot);
 
         }
+
+        private static void TryShutBotDown()
+        {
+            try
+            {
+                _bot.ShutDown();
+            }
+            catch
+            { }
+        }
+
 
         private static void ShutDownBot()
         {
