@@ -17,14 +17,10 @@ namespace Jabbot.AspNetBotHost
         private static readonly string _botPassword = ConfigurationManager.AppSettings["Bot.Password"];
         private static readonly string _botRooms = ConfigurationManager.AppSettings["Bot.RoomList"];
         private static Bot _bot;
-        public BotHostModule()
+        public BotHostModule() : base("bot")
         {
             if (_bot == null)
                 StartBot();
-            Get["/"] = _ =>
-            {
-                return "Jabbot AspNet Nancy Bot Runner";
-            };
             Get["/bot/start"] = _ =>
             {
                 try
