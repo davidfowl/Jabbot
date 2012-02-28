@@ -10,6 +10,7 @@ using System.Web.Hosting;
 using Jabbot.Models;
 using Jabbot.Sprockets.Core;
 using SignalR.Client.Hubs;
+using SignalR.Client.Transports;
 
 namespace Jabbot
 {
@@ -123,7 +124,8 @@ namespace Jabbot
                 _chat.On<IEnumerable<string>>("logOn", OnLogOn);
                 
                 // Start the connection and wait
-                _connection.Start(SignalR.Client.Transports.Transport.LongPolling).Wait();
+
+                _connection.Start(new AutoTransport()).Wait();
 
                 // Join the chat
                 var success = _chat.Invoke<bool>("Join").Result;
