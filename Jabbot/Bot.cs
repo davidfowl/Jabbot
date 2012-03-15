@@ -8,7 +8,7 @@ using System.Net;
 using System.Threading.Tasks;
 using System.Web.Hosting;
 using Jabbot.Models;
-using Jabbot.Sprockets;
+using Jabbot.Sprockets.Core;
 using SignalR.Client.Hubs;
 
 namespace Jabbot
@@ -369,7 +369,14 @@ namespace Jabbot
 
         private void Send(string command)
         {
-            _chat.Invoke("send", command).Wait();
+            // Wrap the command in the appropriate data object, still missing the current room but it appears to work fine without it.
+            var data = new
+                           {
+                               id = Guid.NewGuid(), 
+                               content = command
+                           };
+            
+            _chat.Invoke("send", data).Wait();
         }
     }
 }
