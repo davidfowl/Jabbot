@@ -150,12 +150,22 @@ namespace Jabbot
         /// <param name="room">the room to say it to</param>
         public void Say(string what, string room)
         {
-            try
+			if (what == null)
+			{
+				throw new ArgumentNullException("what");
+			}
+
+			if (what.StartsWith("/"))
+			{
+				throw new InvalidOperationException("Commands are not allowed");
+			}
+			
+			try
             {
                 // Set the active room
                 _chat["activeRoom"] = room;
 
-                Say(what);
+				_chat.Invoke("send", new { content = what, room = room }).Wait();
             }
             finally
             {
@@ -225,22 +235,7 @@ namespace Jabbot
             _connection.Stop();
         }
 
-        private void Say(string what)
-        {
-            if (what == null)
-            {
-                throw new ArgumentNullException("what");
-            }
-
-            if (what.StartsWith("/"))
-            {
-                throw new InvalidOperationException("Commands are not allowed");
-            }
-
-            Send(what);
-        }
-
-        private void ProcessMessage(dynamic message, string room)
+    	private void ProcessMessage(dynamic message, string room)
         {
             // Run this on another thread since the signalr client doesn't like it
             // when we spend a long time processing messages synchronously
