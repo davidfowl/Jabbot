@@ -11,13 +11,13 @@ using Jabbot.Models;
 using Jabbot.Sprockets.Core;
 using SignalR.Client.Hubs;
 using SignalR.Client.Transports;
+using JabbR.Client;
+using JabbR.Client.Models;
 
 namespace Jabbot
 {
     public class Bot
     {
-        private readonly HubConnection _connection;
-        private readonly IHubProxy _chat;
         private readonly string _password;
         private readonly List<ISprocket> _sprockets = new List<ISprocket>();
         private readonly List<IUnhandledMessageSprocket> _unhandledMessageSprockets = new List<IUnhandledMessageSprocket>();
@@ -28,13 +28,31 @@ namespace Jabbot
         private ComposablePartCatalog _catalog = null;
         private CompositionContainer _container = null;
 
+        JabbRClient client;
+
+        private bool isActive = false;
 
         public Bot(string url, string name, string password)
         {
             Name = name;
             _password = password;
-            _connection = new HubConnection(url);
-            _chat = _connection.CreateProxy("JabbR.Chat");
+            //_connection = new HubConnection(url);
+            //_chat = _connection.CreateProxy("JabbR.Chat");
+            client = new JabbRClient(url);
+
+            client.MessageReceived += (message, room) =>
+            {
+                ProcessMessage(message, room);
+            };
+
+            client.UserJoined += (user, message) =>
+            {
+                
+            };
+
+
+
+
         }
 
         public string Name { get; private set; }
@@ -43,11 +61,11 @@ namespace Jabbot
         {
             get
             {
-                return _connection.Credentials;
+                return client.Credentials;
             }
             set
             {
-                _connection.Credentials = value;
+                client.Credentials = value;
             }
         }
 
@@ -55,11 +73,11 @@ namespace Jabbot
         {
             add
             {
-                _connection.Closed += value;
+                client.Disconnected += value;
             }
             remove
             {
-                _connection.Closed -= value;
+                client.Disconnected -= value;
             }
         }
 
@@ -111,33 +129,43 @@ namespace Jabbot
         /// </summary>
         public void PowerUp()
         {
-            if (!_connection.IsActive)
+            if (!isActive)
             {
                 InitializeContainer();
-
-                _chat.On<dynamic, string>("addMessage", ProcessMessage);
-
-                _chat.On("leave", OnLeave);
-
-                _chat.On("addUser", OnJoin);
-
-                _chat.On<IEnumerable<string>>("logOn", OnLogOn);
-                
-                // Start the connection and wait
-
-                _connection.Start(new AutoTransport()).Wait();
-
-                // Join the chat
-                var success = _chat.Invoke<bool>("Join").Result;
-
-                if (!success)
+                client.Connect(Name, _password).ContinueWith(task =>
                 {
-                    // Setup the name of the bot
-                    Send(String.Format("/nick {0} {1}", Name, _password));
-
+                    LogOnInfo info = task.Result;
                     IntializeSprockets();
-                }
+                }).Wait();
+                isActive = true;
             }
+            //if (!_connection.IsActive)
+            //{
+            //    InitializeContainer();
+
+            //    _chat.On<dynamic, string>("addMessage", ProcessMessage);
+
+            //    _chat.On("leave", OnLeave);
+
+            //    _chat.On("addUser", OnJoin);
+
+            //    _chat.On<IEnumerable<string>>("logOn", OnLogOn);
+
+            //    // Start the connection and wait
+
+            //    _connection.Start(new AutoTransport()).Wait();
+
+            //    // Join the chat
+            //    var success = _chat.Invoke<bool>("Join").Result;
+
+            //    if (!success)
+            //    {
+            //        // Setup the name of the bot
+            //        Send(String.Format("/nick {0} {1}", Name, _password));
+
+            //        IntializeSprockets();
+            //    }
+            //}
         }
 
         /// <summary>
@@ -146,8 +174,7 @@ namespace Jabbot
         /// <param name="room">room to create</param>
         public void CreateRoom(string room)
         {
-            Send("/create " + room);
-
+            client.JoinRoom(room);
             // Add the room to the list
             _rooms.Add(room);
         }
@@ -157,21 +184,22 @@ namespace Jabbot
         /// </summary>
         public void Join(string room)
         {
-            Send("/join " + room);
+            client.JoinRoom(room);
 
             // Add the room to the list
             _rooms.Add(room);
         }
 
-        /// <summary>
-        /// Sets the Bot's gravatar email
-        /// </summary>
-        /// <param name="gravatarEmail"></param>
-        public void Gravatar(string gravatarEmail)
-        {
-            Send("/gravatar " + gravatarEmail);
-        }
-       
+        ///// <summary>
+        ///// Sets the Bot's gravatar email
+        ///// </summary>
+        ///// <param name="gravatarEmail"></param>
+        //public void Gravatar(string gravatarEmail)
+        //{
+        //    client.
+        //    Send("/gravatar " + gravatarEmail);
+        //}
+
 
         /// <summary>
         /// Say something to the active room.
@@ -180,18 +208,21 @@ namespace Jabbot
         /// <param name="room">the room to say it to</param>
         public void Say(string what, string room)
         {
-            try
+            if (what == null)
             {
-                // Set the active room
-                _chat["activeRoom"] = room;
+                throw new ArgumentNullException("what");
+            }
 
-                Say(what);
-            }
-            finally
+            if (what.StartsWith("/"))
             {
-                // Reset the active room to null
-                _chat["activeRoom"] = null;
+                throw new InvalidOperationException("Commands are not allowed");
             }
+
+            if (string.IsNullOrWhiteSpace(room))
+            {
+                throw new ArgumentNullException("room");
+            }
+            client.Send(what, room);
         }
 
         /// <summary>
@@ -227,7 +258,7 @@ namespace Jabbot
                 throw new ArgumentNullException("what");
             }
 
-            Send(String.Format("/msg {0} {1}", who, what));
+            client.SendPrivateMessage(who, what);
         }
 
         /// <summary>
@@ -249,28 +280,14 @@ namespace Jabbot
             // Leave all the rooms ever joined
             foreach (var room in _rooms)
             {
-                Send(String.Format("/leave {0}", room));
+                client.LeaveRoom(room);
             }
 
-            _connection.Stop();
+            client.Disconnect();
         }
 
-        private void Say(string what)
-        {
-            if (what == null)
-            {
-                throw new ArgumentNullException("what");
-            }
 
-            if (what.StartsWith("/"))
-            {
-                throw new InvalidOperationException("Commands are not allowed");
-            }
-
-            Send(what);
-        }
-
-        private void ProcessMessage(dynamic message, string room)
+        private void ProcessMessage(Message message, string room)
         {
             // Run this on another thread since the signalr client doesn't like it
             // when we spend a long time processing messages synchronously
@@ -407,7 +424,7 @@ namespace Jabbot
         private static string GetExtensionsPath()
         {
             string rootPath = null;
-            if (HostingEnvironment.IsHosted)    
+            if (HostingEnvironment.IsHosted)
             {
 
                 rootPath = HostingEnvironment.ApplicationPhysicalPath;
@@ -418,11 +435,6 @@ namespace Jabbot
             }
 
             return Path.Combine(rootPath, ExtensionsFolder);
-        }
-
-        private void Send(string command)
-        {
-            _chat.Invoke("send", command).Wait();
         }
     }
 }

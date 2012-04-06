@@ -21,7 +21,7 @@ namespace Jabbot.AspNetBotHost
         {
             if (_bot == null)
                 StartBot();
-            Get["/bot/start"] = _ =>
+            Get["/start"] = _ =>
             {
                 try
                 {
@@ -34,7 +34,7 @@ namespace Jabbot.AspNetBotHost
                 }
             };
 
-            Get["/bot/stop"] = _ =>
+            Get["/stop"] = _ =>
             {
                 try
                 {
