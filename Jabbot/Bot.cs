@@ -19,6 +19,7 @@ namespace Jabbot
     public class Bot
     {
         private readonly string _password;
+        private readonly string _url;
         private readonly List<ISprocket> _sprockets = new List<ISprocket>();
         private readonly List<IUnhandledMessageSprocket> _unhandledMessageSprockets = new List<IUnhandledMessageSprocket>();
         private readonly HashSet<string> _rooms = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -36,23 +37,9 @@ namespace Jabbot
         {
             Name = name;
             _password = password;
+            _url = url;
             //_connection = new HubConnection(url);
             //_chat = _connection.CreateProxy("JabbR.Chat");
-            client = new JabbRClient(url);
-
-            client.MessageReceived += (message, room) =>
-            {
-                ProcessMessage(message, room);
-            };
-
-            client.UserJoined += (user, message) =>
-            {
-                
-            };
-
-
-
-
         }
 
         public string Name { get; private set; }
@@ -132,6 +119,19 @@ namespace Jabbot
             if (!isActive)
             {
                 InitializeContainer();
+
+                client = new JabbRClient(_url);
+
+                client.MessageReceived += (message, room) =>
+                {
+                    ProcessMessage(message, room);
+                };
+
+                client.UserJoined += (user, message) =>
+                {
+
+                };
+
                 client.Connect(Name, _password).ContinueWith(task =>
                 {
                     LogOnInfo info = task.Result;
