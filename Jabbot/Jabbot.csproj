@@ -33,13 +33,19 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json, Version=4.0.8.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Newtonsoft.Json.4.0.8\lib\net40\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Elmah">
+      <HintPath>..\packages\elmah.corelibrary.1.2.1\lib\Elmah.dll</HintPath>
     </Reference>
-    <Reference Include="SignalR.Client, Version=0.4.0.1, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="JabbR.Client">
+      <HintPath>..\assets\JabbR.Client.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\SignalR.Client.0.4.0.1\lib\net40\SignalR.Client.dll</HintPath>
+      <HintPath>..\packages\Newtonsoft.Json.4.5.1\lib\net40\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="SignalR.Client, Version=0.4.0.2, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\SignalR.Client.0.4.0.2\lib\net40\SignalR.Client.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
@@ -53,6 +59,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bot.cs" />
+    <Compile Include="Core\IBot.cs" />
     <Compile Include="Models\ChatMessage.cs" />
     <Compile Include="Models\ChatUser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -60,6 +67,7 @@
     <Compile Include="Sprockets\Core\ISprocket.cs" />
     <Compile Include="Sprockets\Core\ISprocketInitializer.cs" />
     <Compile Include="Sprockets\Core\IUnhandledMessageSprocket.cs" />
+    <Compile Include="Sprockets\ListSprocketsSprocket.cs" />
     <Compile Include="Sprockets\RegexSprocket.cs" />
   </ItemGroup>
   <ItemGroup>

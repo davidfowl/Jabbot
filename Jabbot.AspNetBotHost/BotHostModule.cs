@@ -7,6 +7,7 @@ using Nancy;
 using System.Diagnostics;
 using MomentApp;
 using System.Threading.Tasks;
+using JabbR.Client.Models;
 
 namespace Jabbot.AspNetBotHost
 {
@@ -16,12 +17,27 @@ namespace Jabbot.AspNetBotHost
         private static readonly string _botName = ConfigurationManager.AppSettings["Bot.Name"];
         private static readonly string _botPassword = ConfigurationManager.AppSettings["Bot.Password"];
         private static readonly string _botRooms = ConfigurationManager.AppSettings["Bot.RoomList"];
+        private static readonly string _startMode = ConfigurationManager.AppSettings["Bot.StartMode"];
         private static Bot _bot;
-        public BotHostModule() : base("bot")
+
+        public BotHostModule()
+            : base("bot")
         {
-            if (_bot == null)
+            SetupRoutes();
+            AutoStartBotIfRequired();
+        }
+
+        private static void AutoStartBotIfRequired()
+        {
+            if (_startMode.Equals("auto", StringComparison.OrdinalIgnoreCase))
+            {
                 StartBot();
-            Get["/bot/start"] = _ =>
+            }
+        }
+
+        private void SetupRoutes()
+        {
+            Get["/start"] = _ =>
             {
                 try
                 {
@@ -34,7 +50,7 @@ namespace Jabbot.AspNetBotHost
                 }
             };
 
-            Get["/bot/stop"] = _ =>
+            Get["/stop"] = _ =>
             {
                 try
                 {
@@ -48,8 +64,6 @@ namespace Jabbot.AspNetBotHost
             };
         }
 
-
-
         private static void StartBot()
         {
 
@@ -59,8 +73,7 @@ namespace Jabbot.AspNetBotHost
                 TryShutBotDown();
             }
             _bot = new Bot(_serverUrl, _botName, _botPassword);
-            _bot.PowerUp();
-
+            _bot.StartUp();
             JoinRooms(_bot);
 
         }
@@ -89,7 +102,7 @@ namespace Jabbot.AspNetBotHost
                 Trace.Write("Joining {0}...", room);
                 if (TryCreateRoomIfNotExists(room, bot))
                 {
-                    bot.Join(room);
+                    bot.JoinRoom(room);
                     Trace.WriteLine("OK");
                 }
                 else

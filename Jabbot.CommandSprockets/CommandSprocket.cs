@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Jabbot.Models;
+using Jabbot.Core;
 
 namespace Jabbot.CommandSprockets
 {
@@ -14,7 +15,7 @@ namespace Jabbot.CommandSprockets
         public string Command { get; protected set; }
         public string[] Arguments { get; protected set; }
         public ChatMessage Message { get; protected set; }
-        public Bot Bot { get; protected set; }
+        public IBot Bot { get; protected set; }
         public bool HasArguments { get { return Arguments.Length > 0; } }
 
 
@@ -24,7 +25,7 @@ namespace Jabbot.CommandSprockets
                 SupportedCommands.Any(c => c.Equals(command, StringComparison.OrdinalIgnoreCase));
         }
 
-        public virtual bool Handle(ChatMessage message, Bot bot)
+        public virtual bool Handle(ChatMessage message, IBot bot)
         {
             try
             {
