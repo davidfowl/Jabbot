@@ -65,6 +65,9 @@
     <Reference Include="SignalR">
       <HintPath>..\packages\SignalR.Server.0.4.0.0\lib\net40\SignalR.dll</HintPath>
     </Reference>
+    <Reference Include="SignalR.Client, Version=0.4.0.2, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\SignalR.Client.0.4.0.2\lib\net40\SignalR.Client.dll</HintPath>
+    </Reference>
     <Reference Include="SignalR.Hosting.AspNet">
       <HintPath>..\packages\SignalR.Hosting.AspNet.0.4.0.0\lib\net40\SignalR.Hosting.AspNet.dll</HintPath>
     </Reference>
