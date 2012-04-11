@@ -129,11 +129,13 @@ namespace Jabbot
 
         private void ProcessMessage(JabbR.Client.Models.Message message, string room)
         {
+#if DEBUG
             Console.WriteLine("{0} {1} {2}", room, message.Content, message.User.Name);
             if (message.User.Name != Name)
             {
                 Send("Received " + message.Content + " from " + message.User.Name + " in " + room, room);
             }
+#endif
             Task.Factory.StartNew(() =>
             {
                 string content = message.Content;
