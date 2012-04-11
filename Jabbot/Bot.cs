@@ -14,6 +14,8 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using Jabbot.Models;
 using System.Reflection;
+using JabbR.Client;
+using JabbR.Client.Models;
 
 namespace Jabbot
 {
@@ -43,12 +45,14 @@ namespace Jabbot
 
         private bool _isActive = false;
         private bool _containerInitialized = false;
+        private bool isActive = false;
 
         public Bot(string url, string name, string password)
         {
             Name = name;
             _url = url;
             _password = password;
+            //_chat = _connection.CreateProxy("JabbR.Chat");
 
             InitializeClient();
             CreateCompositionContainer();
@@ -105,10 +109,37 @@ namespace Jabbot
         {
             _client.Disconnect();
         }
+                {
+                    ProcessMessage(message, room);
+                };
+                {
+                {
+                    LogOnInfo info = task.Result;
+                    IntializeSprockets();
+                }).Wait();
+                isActive = true;
+            }
+            //if (!_connection.IsActive)
+            //{
+            //    InitializeContainer();
 
         public void JoinRoom(string room)
         {
             _client.JoinRoom(room);
+
+            //    _connection.Start(new AutoTransport()).Wait();
+
+            //    // Join the chat
+            //    var success = _chat.Invoke<bool>("Join").Result;
+
+            //    if (!success)
+            //    {
+            //        // Setup the name of the bot
+            //        Send(String.Format("/nick {0} {1}", Name, _password));
+
+            //        IntializeSprockets();
+            //    }
+            //}
         }
 
         public void CreateRoom(string room)
@@ -122,9 +153,10 @@ namespace Jabbot
         }
 
         public void Send(string message, string room)
-        {
+        //{
             _client.Send(message, room);
-        }
+        //    Send("/gravatar " + gravatarEmail);
+        //}
 
 
         private void ProcessMessage(JabbR.Client.Models.Message message, string room)
@@ -133,11 +165,15 @@ namespace Jabbot
             if (message.User.Name != Name)
             {
                 Send("Received " + message.Content + " from " + message.User.Name + " in " + room, room);
+            {
+                throw new InvalidOperationException("Commands are not allowed");
             }
             Task.Factory.StartNew(() =>
+            if (string.IsNullOrWhiteSpace(room))
             {
                 string content = message.Content;
                 string name = message.User.Name;
+            client.Send(what, room);
 
                 // Ignore replies from self
                 if (name.Equals(Name, StringComparison.OrdinalIgnoreCase))
@@ -169,13 +205,9 @@ namespace Jabbot
                     Send("JABBOT: Failed to process messages:" + task.Exception.GetBaseException().ToString(), room);
                 }
             });
-        }
-
         private void ProcessUnhandledMessage(ChatMessage chatMessage)
-        {
             // Loop over the unhandled message sprockets
             foreach (var handler in _unhandledMessageSprockets)
-            {
                 // Stop at the first one that handled the message
                 if (handler.Handle(chatMessage, this))
                 {
@@ -335,7 +367,6 @@ namespace Jabbot
 
             return Path.Combine(rootPath, ExtensionsFolder);
         }
-
 
     }
 }
