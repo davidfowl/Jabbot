@@ -19,12 +19,16 @@ namespace Jabbot.AspNetBotHost
         private static readonly string _botRooms = ConfigurationManager.AppSettings["Bot.RoomList"];
         private static readonly string _startMode = ConfigurationManager.AppSettings["Bot.StartMode"];
         private static Bot _bot;
-
+        
         public BotHostModule()
             : base("bot")
         {
             SetupRoutes();
-            AutoStartBotIfRequired();
+
+            After += ctx =>
+            {
+                AutoStartBotIfRequired();
+            };
         }
 
         private static void AutoStartBotIfRequired()
