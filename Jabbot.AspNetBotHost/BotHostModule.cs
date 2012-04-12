@@ -29,7 +29,7 @@ namespace Jabbot.AspNetBotHost
 
         private static void AutoStartBotIfRequired()
         {
-            if (_startMode.Equals("auto", StringComparison.OrdinalIgnoreCase))
+            if (_startMode.Equals("auto", StringComparison.OrdinalIgnoreCase) && _bot == null)
             {
                 StartBot();
             }
