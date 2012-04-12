@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using Jabbot.Models;
 using System.Reflection;
 using System.Web.Management;
+using SignalR.Client.Transports;
 
 namespace Jabbot
 {
@@ -58,7 +59,7 @@ namespace Jabbot
 
         private void InitializeClient()
         {
-            _client = new JabbRClient(_url);
+            _client = new JabbRClient(_url, new LongPollingTransport());
 
             _client.MessageReceived += (message, room) =>
             {
