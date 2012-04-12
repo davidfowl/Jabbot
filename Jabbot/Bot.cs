@@ -93,7 +93,7 @@ namespace Jabbot
             {
                 if (!task.IsFaulted)
                 {
-                    _client.JoinRoom("twitterbot");
+                    InitializeSprockets();
                 }
                 else
                 {
@@ -280,7 +280,7 @@ namespace Jabbot
         /// <summary>
         /// Run after connection to give sprockets a chance to perform any startup actions
         /// </summary>
-        private void IntializeSprockets()
+        private void InitializeSprockets()
         {
             var container = CreateCompositionContainer();
             // Run all sprocket initializers
