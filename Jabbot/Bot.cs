@@ -14,6 +14,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using Jabbot.Models;
 using System.Reflection;
+using System.Web.Management;
 
 namespace Jabbot
 {
@@ -97,6 +98,7 @@ namespace Jabbot
                 else
                 {
                     Console.WriteLine(task.Exception);
+                    new LogEvent(task.Exception.GetBaseException().ToString()).Raise();
                 }
             }).Wait();
         }
@@ -169,6 +171,7 @@ namespace Jabbot
                 {
                     Debug.WriteLine("JABBOT: Failed to process messages. {0}", task.Exception.GetBaseException());
                     Send("JABBOT: Failed to process messages:" + task.Exception.GetBaseException().ToString(), room);
+                    new LogEvent(task.Exception.GetBaseException().ToString()).Raise();
                 }
             });
         }
@@ -178,10 +181,18 @@ namespace Jabbot
             // Loop over the unhandled message sprockets
             foreach (var handler in _unhandledMessageSprockets)
             {
-                // Stop at the first one that handled the message
-                if (handler.Handle(chatMessage, this))
+                try
                 {
-                    break;
+
+                    // Stop at the first one that handled the message
+                    if (handler.Handle(chatMessage, this))
+                    {
+                        break;
+                    }
+                }
+                catch (Exception e)
+                {
+                    new LogEvent(e.GetBaseException().ToString()).Raise();
                 }
             }
         }
@@ -191,11 +202,18 @@ namespace Jabbot
             // Loop over the registered sprockets
             foreach (var handler in _sprockets)
             {
-                // Stop at the first one that handled the message
-                if (handler.Handle(chatMessage, this))
+                try
                 {
-                    handled = true;
-                    break;
+                    // Stop at the first one that handled the message
+                    if (handler.Handle(chatMessage, this))
+                    {
+                        handled = true;
+                        break;
+                    }
+                }
+                catch (Exception e)
+                {
+                    new LogEvent(e.GetBaseException().ToString()).Raise();
                 }
             }
             return handled;
@@ -337,7 +355,13 @@ namespace Jabbot
 
             return Path.Combine(rootPath, ExtensionsFolder);
         }
+    }
+    public class LogEvent : WebRequestErrorEvent
+    {
+        public LogEvent(string message)
+            : base(null, null, 100001, new Exception(message))
+        {
 
-
+        }
     }
 }
