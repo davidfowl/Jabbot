@@ -19,7 +19,7 @@ namespace Jabbot.AspNetBotHost
         private static readonly string _botRooms = ConfigurationManager.AppSettings["Bot.RoomList"];
         private static readonly string _startMode = ConfigurationManager.AppSettings["Bot.StartMode"];
         private static Bot _bot;
-        
+
         public BotHostModule()
             : base("bot")
         {
@@ -66,6 +66,10 @@ namespace Jabbot.AspNetBotHost
                     return e.Message;
                 }
             };
+            Get["/error"] = _ =>
+                {
+                    new LogEvent("This is an intentional error").Raise();
+                };
         }
 
         private static void StartBot()
