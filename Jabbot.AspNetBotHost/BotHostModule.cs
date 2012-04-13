@@ -70,7 +70,6 @@ namespace Jabbot.AspNetBotHost
 
         private static void StartBot()
         {
-
             KeepAliveModule.ScheduleKeepAlive();
             if (_bot != null)
             {
