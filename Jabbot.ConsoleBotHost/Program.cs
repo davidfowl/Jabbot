@@ -14,6 +14,11 @@ namespace Jabbot.ConsoleBotHost
         static void Main(string[] args)
         {
             Console.WriteLine("Jabbot Bot Runner Starting...");
+
+            Bot bot = new Bot("frankenbot", "123456", "http://jabbr-bots.apphb.com");
+            bot.StartUp();
+            Console.ReadLine();
+            return;
             while (!_appShouldExit)
             {
                 RunBot();
@@ -23,11 +28,12 @@ namespace Jabbot.ConsoleBotHost
 
         private static void RunBot()
         {
+            return;
             try
             {
                 Console.WriteLine(String.Format("Connecting to {0}...", _serverUrl));
                 Bot bot = new Bot(_serverUrl, _botName, _botPassword);
-                bot.PowerUp();
+                bot.StartUp();
                 JoinRooms(bot);
                 Console.Write("Press enter to quit...");
                 Console.ReadLine();
@@ -47,7 +53,7 @@ namespace Jabbot.ConsoleBotHost
                 Console.Write("Joining {0}...", room);
                 if (TryCreateRoomIfNotExists(room, bot))
                 {
-                    bot.Join(room);
+                    bot.JoinRoom(room);
                     Console.WriteLine("OK");
                 }
                 else

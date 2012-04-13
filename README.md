@@ -2,7 +2,7 @@
 
 Jabbot is a bot API for [JabbR](https://github.com/davidfowl/JabbR).
 
-Why not write an adapter for [Hubot](https://github.com/github/hubot)?
+Why not write an apater for [Hubot](https://github.com/github/hubot)?
 
 I like writing C# :).
 
@@ -13,7 +13,7 @@ var bot = new Bot("http://myjabbot", "username", "password");
 bot.PowerUp();
 bot.Join("someroom");
 bot.Say("Hello", "someroom");
-bot.Say("Ok I'm off", "someroom");
+bot.Say("Ok I'm off");
 bot.ShutDown();
 ```
 
