@@ -69,6 +69,7 @@ namespace Jabbot.AspNetBotHost
             Get["/error"] = _ =>
                 {
                     new LogEvent("This is an intentional error").Raise();
+                    return "";
                 };
         }
 
