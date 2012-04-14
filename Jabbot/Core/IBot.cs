@@ -16,7 +16,7 @@ namespace Jabbot.Core
         void CreateRoom(string room);       
         void PrivateReply(string toName, string message);
         void Send(string message, string room);
-
+        void WriteDebugInfo(string message);
         ICredentials Credentials { get; }
         event Action Disconnected;
         event Action<Message,string> MessageReceived;
