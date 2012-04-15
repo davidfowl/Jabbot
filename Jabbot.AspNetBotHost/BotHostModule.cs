@@ -20,8 +20,7 @@ namespace Jabbot.AspNetBotHost
         private static readonly string _startMode = ConfigurationManager.AppSettings["Bot.StartMode"];
         private static Bot _bot;
 
-        public BotHostModule()
-            : base("bot")
+        public BotHostModule() : base("bot")
         {
             SetupRoutes();
 

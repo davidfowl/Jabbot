@@ -106,7 +106,7 @@ namespace Jabbot
                 }
                 else
                 {
-                    Console.WriteLine(task.Exception); 
+                    Console.WriteLine(task.Exception);
                     WriteDebugInfo(task.Exception.GetBaseException().ToString());
                 }
             }).Wait();
@@ -152,10 +152,13 @@ namespace Jabbot
             }
 
             if (message.Content.Equals("enabledebug"))
+            {
                 _debugMode = true;
+            }
             if (message.Content.Equals("disabledebug"))
+            {
                 _debugMode = false;
-
+            }
             WriteDebugInfo(string.Format("{0} {1} {2}", room, message.Content, message.User.Name));
 
             if (message.User.Name != Name)
