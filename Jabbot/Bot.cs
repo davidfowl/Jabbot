@@ -44,12 +44,13 @@ namespace Jabbot
         private ComposablePartCatalog _catalog = null;
         private CompositionContainer _container = null;
 
-        private bool _isActive = false;
+        private bool _globalEventsWired = false;
         private bool _containerInitialized = false;
 
         public Bot(string url, string name, string password)
         {
-            TaskScheduler.UnobservedTaskException += new EventHandler<UnobservedTaskExceptionEventArgs>(TaskScheduler_UnobservedTaskException);
+            InitializeGlobalEvents();
+           
             Name = name;
             _url = url;
             _password = password;
@@ -59,9 +60,16 @@ namespace Jabbot
             InitializeContainer();
         }
 
-        void TaskScheduler_UnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
+        private void InitializeGlobalEvents()
         {
-            WriteDebugInfo(e.Exception.GetBaseException().ToString());
+            if (!_globalEventsWired)
+            {
+                TaskScheduler.UnobservedTaskException += (sender, e) =>
+                {
+                    WriteDebugInfo(e.Exception.GetBaseException().ToString());
+                };
+            }
+            _globalEventsWired = true;
         }
 
         private void InitializeClient()
